@@ -11,6 +11,24 @@
             --accent: #3498db;
             --bg: #f8f9fa;
             --border: #dee2e6;
+
+	    --ink:       #1a1f3a;
+            --ink-mid:   #2e3558;
+            --ink-light: #4a5280;
+            --stain:     #1d2d6e;
+            --stain-deep:#0f1a4a;
+            --root:      #c8a96e;
+            --root-pale: #e8d5b0;
+            --root-dim:  #8a6f40;
+            --bg:        #f5f0e8;
+            --bg-warm:   #ede7d6;
+            --bg-card:   #faf7f1;
+            --border:    #c9bfa8;
+            --accent:    #2d4fd6;
+            --accent-glow: rgba(45,79,214,0.15);
+            --green:     #2a6b4a;
+            --red:       #8b2020;
+            --shadow:    rgba(26,31,58,0.12);
         }
 
         body {
@@ -105,7 +123,11 @@
 
         .btn-calc { background-color: #27ae60; }
         .btn-calc:hover { background-color: #2ecc71; }
-        .btn-reset { background-color: #e74c3c; }
+        .btn-reset {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
         .btn-reset:hover { background-color: #c0392b; }
         .btn-export { background-color: var(--accent); }
         .btn-export:hover { background-color: #2980b9; }
@@ -150,7 +172,7 @@
 
     <header>
         <h1>Mycorrhization Calculator</h1>
-        <p>Based on the Trouvelot morphometric method (1986). (If on mobile you may have to use landscape mode to enter data)</p>
+        <p>Based on the Trouvelot morphometric method (1986). </p>
     </header>
 
     <div class="card">
@@ -218,6 +240,10 @@
         <h2>Calculation Log</h2>
         <div class="audit-log" id="audit-log-content"></div>
     </div>
+
+	 <p class="footer-note" style="margin-top:24px;">
+      	  On mobile, use landscape orientation to enter data into the matrix.
+   	 </p>
 
     <script>
         const rows = ['A0', 'A1', 'A2', 'A3'];
