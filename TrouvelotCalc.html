@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trouvelot Mycorrhization Calculator</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --bg: #f8f9fa;
+            --border: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 { margin: 0; color: var(--primary); }
+        h2 { color: var(--secondary); border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Matrix Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+        }
+
+        th { background-color: #e9ecef; }
+        .row-header { background-color: #e9ecef; font-weight: bold; width: 120px;}
+        
+        input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 3px rgba(52, 152, 219, 0.5);
+        }
+
+        /* Utility display */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e1f5fe;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-calc { background-color: #27ae60; }
+        .btn-calc:hover { background-color: #2ecc71; }
+        .btn-reset { background-color: #e74c3c; }
+        .btn-reset:hover { background-color: #c0392b; }
+        .btn-export { background-color: var(--accent); }
+        .btn-export:hover { background-color: #2980b9; }
+        
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+
+        /* Results & Logs */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .result-box {
+            background: #f1f8ff;
+            border: 1px solid #b6d4fe;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .result-box h3 { margin: 0 0 10px 0; font-size: 1.2em; color: var(--accent); }
+        .result-value { font-size: 1.8em; font-weight: bold; }
+
+        .audit-log {
+            font-family: monospace;
+            background: #2d2d2d;
+            color: #a9b7c6;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .formula-highlight { color: #cc7832; }
+        .value-highlight { color: #6897bb; }
+        .result-highlight { color: #a5c261; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mycorrhization Calculator</h1>
+        <p>Based on the Trouvelot morphometric method (1986). (If on mobile you may have to use landscape mode to enter data)</p>
+    </header>
+
+    <div class="card">
+        <h2>Input Matrix</h2>
+        <div class="status-bar">
+            <span>Total Fragments (N): <span id="display-total-n">0</span></span>
+            <span>Colonised Fragments (Nc): <span id="display-total-nc">0</span></span>
+        </div>
+        
+        <table id="input-matrix">
+            <thead>
+                <tr>
+                    <th>Mycorrhization<br>("Class") &rarr;<hr>Arbuscules &darr;</th>
+                    <th>0</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+
+        <div class="btn-group">
+            <button class="btn-calc" onclick="calculate()">Calculate Parameters</button>
+            <button class="btn-reset" onclick="resetForm()">Reset Fields</button>
+            <button class="btn-export" id="btn-export" onclick="exportCSV()" disabled>Export CSV</button>
+        </div>
+    </div>
+
+    <div class="card" id="results-section" style="display: none;">
+        <h2>Results</h2>
+        <div class="results-grid">
+            <div class="result-box">
+                <h3>F%</h3>
+                <div class="result-value" id="res-F">0.00%</div>
+                <small>Frequency of colonisation</small>
+            </div>
+            <div class="result-box">
+                <h3>M%</h3>
+                <div class="result-value" id="res-M">0.00%</div>
+                <small>Intensity in whole root</small>
+            </div>
+            <div class="result-box">
+                <h3>m%</h3>
+                <div class="result-value" id="res-m_small">0.00%</div>
+                <small>Intensity in colonised</small>
+            </div>
+            <div class="result-box">
+                <h3>a%</h3>
+                <div class="result-value" id="res-a_small">0.00%</div>
+                <small>Arbuscules in colonised</small>
+            </div>
+            <div class="result-box">
+                <h3>A%</h3>
+                <div class="result-value" id="res-A">0.00%</div>
+                <small>Arbuscules in whole root</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="audit-section" style="display: none;">
+        <h2>Calculation Log</h2>
+        <div class="audit-log" id="audit-log-content"></div>
+    </div>
+
+    <script>
+        const rows = ['A0', 'A1', 'A2', 'A3'];
+        const cols = [0, 1, 2, 3, 4, 5];
+        let currentResults = {};
+
+        // Initialization
+        window.onload = () => {
+            const tbody = document.querySelector('#input-matrix tbody');
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                const th = document.createElement('td');
+                th.className = 'row-header';
+                th.textContent = row;
+                tr.appendChild(th);
+
+                cols.forEach(col => {
+                    const td = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.id = `cell-${row}-${col}`;
+                    input.className = 'matrix-input';
+                    input.addEventListener('input', updateTotalFragments);
+                    
+                    // Biological constraint logic warning: Arbuscules cannot exist without colonisation
+                    if (col === 0 && row !== 'A0') {
+                        input.placeholder = "N/A";
+                        input.title = "Class 0 implies no colonisation, thus no arbuscules should be present.";
+                    }
+
+                    td.appendChild(input);
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        };
+
+        function getVal(row, col) {
+            const val = parseInt(document.getElementById(`cell-${row}-${col}`).value, 10);
+            return isNaN(val) ? 0 : Math.max(0, val);
+        }
+
+        function updateTotalFragments() {
+            let N = 0;
+            let Nc = 0;
+
+            rows.forEach(row => {
+                cols.forEach(col => {
+                    const val = getVal(row, col);
+                    N += val;
+                    if (col > 0) Nc += val; // cols 1-5 are colonised
+                });
+            });
+
+            document.getElementById('display-total-n').textContent = N;
+            document.getElementById('display-total-nc').textContent = Nc;
+        }
+
+        function calculate() {
+            let N = 0, Nc = 0;
+            let n_cols = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0};
+            let mA = {'A0':0, 'A1':0, 'A2':0, 'A3':0};
+
+            // Aggregate data
+            rows.forEach(row => {
+                cols.forEach(col => {
+                    const val = getVal(row, col);
+                    N += val;
+                    n_cols[col] += val;
+                    if (col > 0) {
+                        Nc += val;
+                    }
+                    // For arbuscule counts (mA1, mA2, mA3), we only consider colonised fragments (cols 1-5)
+                    // according to the PDF logic, though biologically A1-A3 in col 0 should be 0 anyway.
+                    if (col > 0) {
+                        mA[row] += val;
+                    }
+                });
+            });
+
+            if (N === 0) {
+                alert("Please enter fragment counts into the matrix before calculating.");
+                return;
+            }
+
+            // Calculations
+            const F = (Nc / N) * 100;
+            
+            const numerator_M_m = (95 * n_cols[5]) + (70 * n_cols[4]) + (30 * n_cols[3]) + (5 * n_cols[2]) + (1 * n_cols[1]);
+            const M = (numerator_M_m / N);
+            const m = Nc > 0 ? (numerator_M_m / Nc) : 0;
+
+            const numerator_a_A = (100 * mA['A3']) + (50 * mA['A2']) + (10 * mA['A1']);
+            const a = Nc > 0 ? (numerator_a_A / Nc) : 0;
+            const A = (numerator_a_A / N);
+
+            // Store for export
+            currentResults = { F, M, m, a, A, N, Nc, n_cols, mA, numerator_M_m, numerator_a_A };
+
+            // Update UI
+            document.getElementById('res-F').textContent = F.toFixed(2) + '%';
+            document.getElementById('res-M').textContent = M.toFixed(2) + '%';
+            document.getElementById('res-m_small').textContent = m.toFixed(2) + '%';
+            document.getElementById('res-a_small').textContent = a.toFixed(2) + '%';
+            document.getElementById('res-A').textContent = A.toFixed(2) + '%';
+
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('btn-export').disabled = false;
+
+            generateAuditLog();
+        }
+
+        function generateAuditLog() {
+            const c = currentResults;
+            const logElement = document.getElementById('audit-log-content');
+            
+            const logHtml = `
+<span class="formula-highlight">=== Fragment Totals ===</span>
+<span class="value-highlight">N (Total Fragments)</span>  = ${c.N}
+<span class="value-highlight">Nc (Colonised)</span>       = Sum of cols 1 to 5 = ${c.Nc}
+<span class="value-highlight">Column Sums (n)</span>      : n1=${c.n_cols[1]}, n2=${c.n_cols[2]}, n3=${c.n_cols[3]}, n4=${c.n_cols[4]}, n5=${c.n_cols[5]}
+<span class="value-highlight">Arbuscule Sums (mA)</span>  : mA1=${c.mA['A1']}, mA2=${c.mA['A2']}, mA3=${c.mA['A3']}
+
+<span class="formula-highlight">=== (a) Frequency of colonisation (F%) ===</span>
+Formula : F% = (Nc / N) * 100
+Working : F% = (${c.Nc} / ${c.N}) * 100
+Result  : <span class="result-highlight">F% = ${c.F.toFixed(2)}%</span>
+
+<span class="formula-highlight">=== (b) Intensity in whole root (M%) ===</span>
+Formula : Numerator = (95*n5 + 70*n4 + 30*n3 + 5*n2 + 1*n1)
+Working : Numerator = (95*${c.n_cols[5]} + 70*${c.n_cols[4]} + 30*${c.n_cols[3]} + 5*${c.n_cols[2]} + 1*${c.n_cols[1]}) = ${c.numerator_M_m}
+Working : M% = Numerator / N = ${c.numerator_M_m} / ${c.N}
+Result  : <span class="result-highlight">M% = ${c.M.toFixed(2)}%</span>
+
+<span class="formula-highlight">=== (c) Intensity in colonised fragments (m%) ===</span>
+Formula : m% = Numerator / Nc
+Working : m% = ${c.numerator_M_m} / ${c.Nc || '0 (Division by zero avoided)'}
+Result  : <span class="result-highlight">m% = ${c.m.toFixed(2)}%</span>
+
+<span class="formula-highlight">=== (d) Arbuscule abundance in colonised (a%) ===</span>
+Formula : Arbuscule Num = (100*mA3 + 50*mA2 + 10*mA1)
+Working : Arbuscule Num = (100*${c.mA['A3']} + 50*${c.mA['A2']} + 10*${c.mA['A1']}) = ${c.numerator_a_A}
+Working : a% = Arbuscule Num / Nc = ${c.numerator_a_A} / ${c.Nc || '0 (Division by zero avoided)'}
+Result  : <span class="result-highlight">a% = ${c.a.toFixed(2)}%</span>
+
+<span class="formula-highlight">=== (e) Arbuscule abundance in whole root (A%) ===</span>
+Formula : A% = Arbuscule Num / N
+Working : A% = ${c.numerator_a_A} / ${c.N}
+Result  : <span class="result-highlight">A% = ${c.A.toFixed(2)}%</span>
+            `.trim();
+
+            logElement.innerHTML = logHtml;
+            document.getElementById('audit-section').style.display = 'block';
+        }
+
+        function exportCSV() {
+            // Ensure there is data to export
+            let totalFragments = parseInt(document.getElementById('display-total-n').textContent, 10);
+            if (totalFragments === 0) {
+                alert("No data to export. Please enter counts into the matrix.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            // Tidy data headers ideal for R/dplyr/ggplot2
+            csvContent += "Fragment_ID,Mycorrhization_Class,Arbuscule_Abundance\n";
+
+            let fragmentId = 1;
+
+            // Iterate through every cell in the matrix
+            rows.forEach(row => {
+                // Convert 'A0', 'A1' etc., to integers '0', '1' by removing the 'A'
+                let arbusculeInt = row.replace('A', ''); 
+
+                cols.forEach(col => {
+                    const count = getVal(row, col);
+                    
+                    // Unpack the counts: create a new row for every single root segment
+                    for (let i = 0; i < count; i++) {
+                        // col = Mycorrhization Class (0-5)
+                        // arbusculeInt = Arbuscule Abundance (0-3)
+                        csvContent += `${fragmentId},${col},${arbusculeInt}\n`;
+                        fragmentId++;
+                    }
+                });
+            });
+
+            // Trigger the download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "AMF_sample_.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetForm() {
+            document.querySelectorAll('.matrix-input').forEach(input => input.value = '');
+            updateTotalFragments();
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('audit-section').style.display = 'none';
+            document.getElementById('btn-export').disabled = true;
+            currentResults = {};
+        }
+    </script>
+</body>
+</html>
